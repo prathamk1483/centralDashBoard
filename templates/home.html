@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Security Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .client-filter {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .logs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .log-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .log-section h3 {
+            margin-top: 0;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .malware-section h3 { background-color: #dc3545; }
+        .nids-section h3 { background-color: #fd7e14; }
+        .email-section h3 { background-color: #0d6efd; }
+
+        .log-content {
+            margin-top: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            border-left: 4px solid transparent;
+        }
+
+        .log-entry.malware { border-color: #dc3545; }
+        .log-entry.nids { border-color: #fd7e14; }
+        .log-entry.email { border-color: #0d6efd; }
+
+        .log-client {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .log-timestamp {
+            font-size: 0.8em;
+            color: #999;
+            float: right;
+        }
+
+        .log-data {
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Network Security Dashboard</h1>
+        <select class="client-filter" id="clientFilter">
+            <option value="ALL">All Clients</option>
+            <option value="PC1">PC1</option>
+            <option value="PC2">PC2</option>
+            <option value="PC3">PC3</option>
+        </select>
+    </div>
+
+    <div class="logs-container">
+        <div class="log-section malware-section">
+            <h3>Malware Detection</h3>
+            <div class="log-content" id="malwareLogs"></div>
+        </div>
+        
+        <div class="log-section nids-section">
+            <h3>Network Intrusions</h3>
+            <div class="log-content" id="nidsLogs"></div>
+        </div>
+
+        <div class="log-section email-section">
+            <h3>Email Security</h3>
+            <div class="log-content" id="emailLogs"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8001/ws/socket-server/");
+        socket.onopen = () => {
+            console.log("WebSocket connected");
+        };
+
+        let selectedClient = 'ALL';
+        const logsCache = {
+            malware: [],
+            nids: [],
+            email: []
+        };
+
+        // Initialize client filter
+        document.getElementById('clientFilter').addEventListener('change', (e) => {
+            selectedClient = e.target.value;
+            updateLogDisplays();
+        });
+
+        socket.onmessage = (event) => {
+            const logEntry = JSON.parse(event.data);
+            const now = new Date();
+            
+            // Add timestamp and client info
+            logEntry.timestamp = now.toLocaleTimeString();
+            
+            // Cache the log entry
+            if (logsCache[logEntry.type]) {
+                logsCache[logEntry.type].push(logEntry);
+                updateLogDisplay(logEntry.type);
+            }
+        };
+
+        function updateLogDisplays() {
+            ['malware', 'nids', 'email'].forEach(type => {
+                updateLogDisplay(type);
+            });
+        }
+
+        function updateLogDisplay(type) {
+            const container = document.getElementById(`${type}Logs`);
+            container.innerHTML = '';
+            
+            logsCache[type]
+                .filter(log => selectedClient === 'ALL' || log.client === selectedClient)
+                .forEach(log => {
+                    container.appendChild(createLogElement(log));
+                });
+        }
+
+        function createLogElement(log) {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${log.type}`;
+            
+            entry.innerHTML = `
+                <div class="log-header">
+                    <span class="log-client">${log.client}</span>
+                    <span class="log-timestamp">${log.timestamp}</span>
+                </div>
+                <div class="log-data">${JSON.stringify(log.data, null, 2)}</div>
+            `;
+
+            return entry;
+        }
+
+        socket.onerror = (err) => {
+            console.error("WebSocket error:", err);
+        };
+
+        socket.onclose = () => {
+            console.log("WebSocket disconnected");
+        };
+    </script>
+</body>
+</html>
