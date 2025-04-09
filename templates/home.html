@@ -113,7 +113,7 @@
     </div>
 
     <script>
-        const socket = new WebSocket("ws://localhost:8001/ws/socket-server/");
+        const socket = new WebSocket("https://centraldashboard-1.onrender.com/ws/socket-server/");
         socket.onopen = () => {
             console.log("WebSocket connected");
         };
