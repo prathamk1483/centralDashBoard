@@ -82,6 +82,17 @@
             font-family: monospace;
             white-space: pre-wrap;
         }
+        .bot-reply p {
+        margin: 5px 0;
+    }
+    .bot-reply strong {
+        display: block;
+        margin-top: 10px;
+        color: #0d6efd;
+    }
+    .bot-reply li {
+        margin-left: 20px;
+    }
     </style>
 </head>
 <body>
@@ -111,6 +122,57 @@
             <div class="log-content" id="emailLogs"></div>
         </div>
     </div>
+    
+    <!-- Chat Toggle Button -->
+<div id="chatIcon" style="
+position: fixed;
+bottom: 20px;
+right: 20px;
+background: #0d6efd;
+width: 50px;
+height: 50px;
+border-radius: 50%;
+color: white;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+cursor: pointer;
+z-index: 1000;
+box-shadow: 0 0 10px rgba(0,0,0,0.3);
+">
+💬
+</div>
+
+<!-- Chatbot Container (initially hidden) -->
+<div id="chatbotContainer" style="
+position: fixed;
+bottom: 80px;
+right: 20px;
+width: 300px;
+max-height: 400px;
+background: white;
+border: 1px solid #ccc;
+border-radius: 8px;
+box-shadow: 0 0 10px rgba(0,0,0,0.2);
+display: none;
+flex-direction: column;
+font-size: 14px;
+z-index: 1000;
+">
+<div style="background: #0d6efd; color: white; padding: 10px; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+    <span>Chatbot Assistant</span>
+    <button onclick="toggleChat(false)" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer;">✖</button>
+</div>
+<div id="chatLog" style="flex: 1; padding: 10px; overflow-y: auto;"></div>
+<div style="display: flex; border-top: 1px solid #ccc;">
+    <input id="chatInput" type="text" placeholder="Type a message..." style="flex: 1; border: none; padding: 10px;">
+    <button onclick="sendMessage()" style="background: #0d6efd; color: white; border: none; padding: 10px 15px;">Send</button>
+</div>
+</div>
+
+    
+
 
     <script>
         const socket = new WebSocket("https://centraldashboard-1.onrender.com/ws/socket-server/");
@@ -184,6 +246,158 @@
         socket.onclose = () => {
             console.log("WebSocket disconnected");
         };
+    const chatIcon = document.getElementById('chatIcon');
+    const chatbotContainer = document.getElementById('chatbotContainer');
+
+    chatIcon.addEventListener('click', () => toggleChat(true));
+
+    function toggleChat(open) {
+        // if(!open){
+        //     const chatLog = document.getElementById("chatLog");
+        //     chatLog.innerHTML = "";
+        // }
+        chatbotContainer.style.display = open ? 'flex' : 'none';
+    }
+    async function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+
+        appendChatMessage("You", message);
+        input.value = "";
+
+        const botReplyElem = appendChatMessage("Bot", "", true);
+        botReplyElem.innerHTML = `<em>Analyzing...</em>`;
+
+        try {
+            const response = await fetch("https://chat-7u55.onrender.com/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: message })
+            });
+
+            const data = await response.json();
+
+            const raw = data.response || "Sorry, I didn't understand that.";
+            const formatted = formatBotResponse(raw);
+
+            // Clear "Analyzing..." and simulate typing
+            botReplyElem.innerHTML = "";
+            typeEffect(botReplyElem, formatted, 5);
+        } catch (error) {
+            console.error("Error:", error);
+            botReplyElem.innerHTML = "There was an error connecting to the assistant.";
+        }
+    }
+
+
+function appendChatMessage(sender, message, isHTML = false) {
+    const chatLog = document.getElementById("chatLog");
+    const msgElem = document.createElement("div");
+    const id = `msg-${Date.now()}`;
+    msgElem.setAttribute("id", id);
+    msgElem.style.marginBottom = "10px";
+    if (isHTML) {
+        msgElem.innerHTML = `<strong>${sender}:</strong><div class="bot-reply"></div>`;
+    } else {
+        msgElem.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    }
+    chatLog.appendChild(msgElem);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return document.querySelector(`#${id} .bot-reply`) || msgElem;
+}
+
+
+function updateChatMessage(id, sender, message) {
+    const msgElem = document.getElementById(id);
+    if (msgElem) {
+        msgElem.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    }
+}
+
+
+document.getElementById("chatInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") sendMessage();
+});
+
+
+    document.getElementById("chatInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") sendMessage();
+    });
+
+   function typeEffect(element, text, speed = 10) {
+    const parts = text.split(/(\*\*.*?\*\*)/); // split by **bold**
+    let i = 0, j = 0;
+
+    function typeNextPart() {
+        if (i >= parts.length) return;
+
+        let part = escapeHTML(parts[i]);
+        let isBold = part.startsWith("&ast;&ast;") && part.endsWith("&ast;&ast;");
+
+        if (isBold) {
+            const boldText = document.createElement("strong");
+            boldText.textContent = "";
+            element.appendChild(boldText);
+            let content = part.slice(10, -10); // length of escaped "**" is 10 chars total
+            j = 0;
+
+            function typeBoldChar() {
+                if (j < content.length) {
+                    boldText.textContent += content.charAt(j++);
+                    setTimeout(typeBoldChar, speed);
+                } else {
+                    i++;
+                    typeNextPart();
+                }
+            }
+            typeBoldChar();
+        } else {
+            let normalText = document.createTextNode("");
+            element.appendChild(normalText);
+            j = 0;
+
+            function typeNormalChar() {
+                if (j < part.length) {
+                    normalText.textContent += part.charAt(j++);
+                    setTimeout(typeNormalChar, speed);
+                } else {
+                    i++;
+                    typeNextPart();
+                }
+            }
+            typeNormalChar();
+        }
+    }
+
+    typeNextPart();
+}
+
+function escapeHTML(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/\*/g, "&ast;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+
+function formatBotResponse(text) {
+    const lines = text.split("\n").map(line => {
+        if (line.startsWith("* ")) {
+            return `<li>${line.slice(2)}</li>`;
+        }
+        if (line.startsWith("**") && line.endsWith("**")) {
+            return `<strong>${line.slice(2, -2)}</strong>`;
+        }
+        return `<p>${line}</p>`;
+    });
+
+    // Join lines into properly wrapped HTML
+    return lines.join("");
+}
+
+
     </script>
 </body>
 </html>
