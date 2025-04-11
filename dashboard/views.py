@@ -71,7 +71,7 @@ def index(request):
 def dashboard(request):
     return render(request,"home.html")
 
-@login_required
+
 @api_view(["POST"])
 def receiveLogs(request):
     data = request.data
