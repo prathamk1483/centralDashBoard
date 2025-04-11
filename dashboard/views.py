@@ -9,7 +9,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def Login(request):
     if request.method == "POST":
         if request.user.is_authenticated:
@@ -31,6 +33,7 @@ def Login(request):
 
     return render(request, 'login.html')
 
+@csrf_exempt
 def signup(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -55,7 +58,7 @@ def signup(request):
     return render(request, 'signup.html')
 
 
-# Logout User
+
 def Logout(request):
     logout(request)
     return redirect('Login')
