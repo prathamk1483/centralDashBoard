@@ -75,7 +75,7 @@ ASGI_APPLICATION = 'central_dashboard.asgi.application'
 # WebSocket layer
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'  # Use Redis in production
+        'BACKEND': 'channels.layers.InMemoryChannelLayer' 
     }
 }
 
@@ -126,6 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
