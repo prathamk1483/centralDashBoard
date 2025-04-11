@@ -93,6 +93,42 @@
     .bot-reply li {
         margin-left: 20px;
     }
+    .log-section {
+        resize: both;
+        overflow: auto;
+    }
+    .log-data {
+        word-wrap: break-word;
+        white-space: pre-wrap;
+    }
+    .clear-btn,
+.redirect-btn {
+    margin-left: 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease;
+}
+
+.clear-btn {
+    background-color: #6c757d;
+    color: white;
+}
+.clear-btn:hover {
+    background-color: #5a6268;
+}
+
+.redirect-btn {
+    background-color: #198754;
+    color: white;
+}
+.redirect-btn:hover {
+    background-color: #157347;
+}
+
     </style>
 </head>
 <body>
@@ -104,24 +140,37 @@
             <option value="PC2">PC2</option>
             <option value="PC3">PC3</option>
         </select>
+        <button style="padding: 6px 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px;"><a style="text-decoration: none; color: white;" href="{% url 'logout' %}">Logout</a></button>
     </div>
 
     <div class="logs-container">
         <div class="log-section malware-section">
-            <h3>Malware Detection</h3>
+            <h3>
+                Malware Detection 
+                <button onclick="clearLogs('malware')" class="clear-btn">Clear Logs</button>
+            </h3>
             <div class="log-content" id="malwareLogs"></div>
         </div>
-        
+    
         <div class="log-section nids-section">
-            <h3>Network Intrusions</h3>
+            <h3>
+                Network Intrusions 
+                <button onclick="clearLogs('nids')" class="clear-btn">Clear Logs</button>
+            </h3>
             <div class="log-content" id="nidsLogs"></div>
         </div>
-
+    
         <div class="log-section email-section">
-            <h3>Email Security</h3>
+            <h3>
+                Email Security 
+                <button onclick="clearLogs('email')" class="clear-btn">Clear Logs</button>
+                <button onclick="window.location.href='YOUR_REDIRECT_LINK'" class="redirect-btn">View full dashboard</button>
+            </h3>
             <div class="log-content" id="emailLogs"></div>
         </div>
     </div>
+    
+    
     
     <!-- Chat Toggle Button -->
 <div id="chatIcon" style="
@@ -175,6 +224,10 @@ z-index: 1000;
 
 
     <script>
+        function clearLogs(type) {
+            logsCache[type] = [];
+            updateLogDisplay(type);
+        }
         const socket = new WebSocket("https://centraldashboard-1.onrender.com/ws/socket-server/");
         socket.onopen = () => {
             console.log("WebSocket connected");
