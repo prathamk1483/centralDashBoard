@@ -69,7 +69,10 @@ TEMPLATES = [
         },
     },
 ]
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://centraldashboard-1.onrender.com/",
+    # Add more if needed
+]
 
 ASGI_APPLICATION = 'central_dashboard.asgi.application'
 
