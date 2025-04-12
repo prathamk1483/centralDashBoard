@@ -13,3 +13,10 @@ class DashBoardConsumer(AsyncWebsocketConsumer):
     async def send_log(self, event):
         data = event['data']
         await self.send(text_data=json.dumps(data))
+
+    async def connect(self):
+        if self.scope["user"].is_anonymous:
+            await self.close()
+        else:
+            await self.accept()
+
