@@ -250,10 +250,8 @@ z-index: 1000;
             const logEntry = JSON.parse(event.data);
             const now = new Date();
             console.log(data);
-            // Add timestamp and client info
             logEntry.timestamp = now.toLocaleTimeString();
             console.log(logEntry)
-            // Cache the log entry
             if (logsCache[logEntry.type]) {
                 logsCache[logEntry.type].push(logEntry);
                 updateLogDisplay(logEntry.type);
@@ -308,10 +306,6 @@ z-index: 1000;
     chatIcon.addEventListener('click', () => toggleChat(true));
 
     function toggleChat(open) {
-        // if(!open){
-        //     const chatLog = document.getElementById("chatLog");
-        //     chatLog.innerHTML = "";
-        // }
         chatbotContainer.style.display = open ? 'flex' : 'none';
     }
     async function sendMessage() {
@@ -333,11 +327,9 @@ z-index: 1000;
             });
 
             const data = await response.json();
-
+            console.log(response)
             const raw = data.response || "Sorry, I didn't understand that.";
-            const formatted = formatBotResponse(raw);
-
-            // Clear "Analyzing..." and simulate typing
+            const formatted = raw;
             botReplyElem.innerHTML = "";
             typeEffect(botReplyElem, formatted, 5);
         } catch (error) {
@@ -381,77 +373,42 @@ document.getElementById("chatInput").addEventListener("keydown", function(e) {
         if (e.key === "Enter") sendMessage();
     });
 
-   function typeEffect(element, text, speed = 10) {
-    const parts = text.split(/(\*\*.*?\*\*)/); // split by **bold**
-    let i = 0, j = 0;
+    function typeEffect(element, text, speed = 30) {
+    const parts = text.split(/(\*\*.*?\*\*)/); // Split text into bold/non-bold parts
+    let i = 0;
 
-    function typeNextPart() {
+    function typePart() {
         if (i >= parts.length) return;
 
-        let part = escapeHTML(parts[i]);
-        let isBold = part.startsWith("&ast;&ast;") && part.endsWith("&ast;&ast;");
+        const part = parts[i++];
+        const isBold = part.startsWith("**") && part.endsWith("**");
+        const content = isBold ? part.slice(2, -2) : part;
+        const span = isBold ? document.createElement("strong") : document.createTextNode("");
+        let j = 0;
 
-        if (isBold) {
-            const boldText = document.createElement("strong");
-            boldText.textContent = "";
-            element.appendChild(boldText);
-            let content = part.slice(10, -10); // length of escaped "**" is 10 chars total
-            j = 0;
+        if (isBold) element.appendChild(span);
+        else span.textContent = "";
 
-            function typeBoldChar() {
-                if (j < content.length) {
-                    boldText.textContent += content.charAt(j++);
-                    setTimeout(typeBoldChar, speed);
-                } else {
-                    i++;
-                    typeNextPart();
-                }
+        function typeChar() {
+            if (j < content.length) {
+                if (isBold) span.textContent += content[j++];
+                else span.textContent += content[j++];
+                setTimeout(typeChar, speed);
+            } else {
+                if (!isBold) element.appendChild(span);
+                typePart(); // move to next part
             }
-            typeBoldChar();
-        } else {
-            let normalText = document.createTextNode("");
-            element.appendChild(normalText);
-            j = 0;
-
-            function typeNormalChar() {
-                if (j < part.length) {
-                    normalText.textContent += part.charAt(j++);
-                    setTimeout(typeNormalChar, speed);
-                } else {
-                    i++;
-                    typeNextPart();
-                }
-            }
-            typeNormalChar();
         }
+
+        typeChar();
     }
 
-    typeNextPart();
-}
-
-function escapeHTML(str) {
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/\*/g, "&ast;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+    typePart();
 }
 
 
-function formatBotResponse(text) {
-    const lines = text.split("\n").map(line => {
-        if (line.startsWith("* ")) {
-            return `<li>${line.slice(2)}</li>`;
-        }
-        if (line.startsWith("**") && line.endsWith("**")) {
-            return `<strong>${line.slice(2, -2)}</strong>`;
-        }
-        return `<p>${line}</p>`;
-    });
 
-    // Join lines into properly wrapped HTML
-    return lines.join("");
-}
+
 
 
     </script>
