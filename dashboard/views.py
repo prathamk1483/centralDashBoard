@@ -58,7 +58,7 @@ def signup(request):
     return render(request, 'signup.html')
 
 
-
+@login_required
 def Logout(request):
     logout(request)
     return redirect('Login')
@@ -67,7 +67,7 @@ def Logout(request):
 def index(request):
     return redirect('Login')
 
-@login_required
+
 def dashboard(request):
     return render(request,"home.html")
 
