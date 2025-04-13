@@ -249,7 +249,7 @@ z-index: 1000;
         socket.onmessage = (event) => {
             const logEntry = JSON.parse(event.data);
             const now = new Date();
-            
+            console.log(data);
             // Add timestamp and client info
             logEntry.timestamp = now.toLocaleTimeString();
             console.log(logEntry)

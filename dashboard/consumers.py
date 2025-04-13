@@ -12,6 +12,7 @@ class DashBoardConsumer(AsyncWebsocketConsumer):
 
     async def send_log(self, event):
         data = event['data']
+        print(data)
         await self.send(text_data=json.dumps(data))
 
     async def connect(self):
