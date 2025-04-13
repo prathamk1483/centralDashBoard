@@ -229,7 +229,7 @@ z-index: 1000;
             updateLogDisplay(type);
         }
         console.log(window.location.host)
-        let url = `ws://${window.location.host}/ws/socket-server/`;
+        let url = `wss://${window.location.host}/ws/socket-server/`;
         const socket = new WebSocket(url);
         socket.onopen = () => {
             console.log("WebSocket connected");
