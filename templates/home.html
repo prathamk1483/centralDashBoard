@@ -228,7 +228,9 @@ z-index: 1000;
             logsCache[type] = [];
             updateLogDisplay(type);
         }
-        const socket = new WebSocket("wss://centraldashboard.onrender.com/ws/socket-server/");
+        console.log(window.location.host)
+        let url = `ws://127.0.0.1:8000/ws/socket-server/`;
+        const socket = new WebSocket(url);
         socket.onopen = () => {
             console.log("WebSocket connected");
         };
@@ -249,7 +251,7 @@ z-index: 1000;
         socket.onmessage = (event) => {
             const logEntry = JSON.parse(event.data);
             const now = new Date();
-            console.log(data);
+            console.log(logEntry);
             logEntry.timestamp = now.toLocaleTimeString();
             console.log(logEntry)
             if (logsCache[logEntry.type]) {
