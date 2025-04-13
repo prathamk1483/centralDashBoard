@@ -67,6 +67,7 @@ def Logout(request):
 def index(request):
     return redirect('Login')
 
+@login_required
 def dashboard(request):
     return render(request,"home.html")
 

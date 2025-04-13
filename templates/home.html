@@ -228,7 +228,7 @@ z-index: 1000;
             logsCache[type] = [];
             updateLogDisplay(type);
         }
-        const socket = new WebSocket("https://centraldashboard-1.onrender.com/ws/socket-server/");
+        const socket = new WebSocket("ws://localhost:8000/ws/socket-server/");
         socket.onopen = () => {
             console.log("WebSocket connected");
         };
