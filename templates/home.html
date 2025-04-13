@@ -164,7 +164,7 @@
             <h3>
                 Email Security 
                 <button onclick="clearLogs('email')" class="clear-btn">Clear Logs</button>
-                <button onclick="window.location.href='https://admin-dashboard-frontend-self.vercel.app/'" class="redirect-btn">View full dashboard</button>
+                <button onclick="window.location.href='YOUR_LINK'" class="redirect-btn">View full dashboard</button>
             </h3>
             <div class="log-content" id="emailLogs"></div>
         </div>
@@ -374,7 +374,7 @@ document.getElementById("chatInput").addEventListener("keydown", function(e) {
     });
 
     function typeEffect(element, text, speed = 30) {
-    const parts = text.split(/(\*\*.*?\*\*)/); // Split text into bold/non-bold parts
+    const parts = text.split(/(\*\*.*?\*\*)/); 
     let i = 0;
 
     function typePart() {
@@ -396,7 +396,7 @@ document.getElementById("chatInput").addEventListener("keydown", function(e) {
                 setTimeout(typeChar, speed);
             } else {
                 if (!isBold) element.appendChild(span);
-                typePart(); // move to next part
+                typePart();
             }
         }
 

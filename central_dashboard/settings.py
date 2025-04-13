@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-k$q@q908p^-2zlar(+91+a)!tk+rj_25zsdm6m20=(u1zsp4u1
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://centraldashboard.onrender.com'
+]
 
 # Application definition
 
